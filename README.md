@@ -1,5 +1,5 @@
 # placebook
 
-*******Dev in Progress********
+*******Dev in Progress*******
 
 Target ---> a facebook like book, but for places only 😉
