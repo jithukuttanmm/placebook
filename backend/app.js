@@ -1,6 +1,25 @@
-const express = require("expressjs");
+const express = require("express");
 const bodyParser = require("body-parser");
+const { placeRouter } = require("./routes/places-routes.js");
+const HttpError = require("./models/http-error.js");
 
 const app = express();
+app.use(bodyParser.json());
+
+app.use("/api/places", placeRouter);
+
+app.use((req, res, next) => {
+  throw new HttpError("Could not find route", 404);
+});
+
+app.use((error, req, res, next) => {
+  //default error handling code
+  if (res.headerSent) {
+    return next(error);
+  }
+  res
+    .status(error.code || 500)
+    .json({ error: error.message || "Something went wrong !" });
+});
 
 app.listen(5000);
