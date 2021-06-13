@@ -4,9 +4,13 @@ const bodyParser = require("body-parser");
 const { placeRouter } = require("./routes/places-routes.js");
 const { usersRouter } = require("./routes/users-routes.js");
 const HttpError = require("./models/http-error.js");
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
+
+app.use(cors());
+app.options("*localhost*", cors());
 
 app.use("/api/places", placeRouter);
 app.use("/api/users", usersRouter);
