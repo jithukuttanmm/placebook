@@ -52,7 +52,10 @@ const login = async (req, res, next) => {
   if (!user || user.password !== password)
     return next(new HttpError("Email or password wrong.", 401));
 
-  return res.json("Welcome " + user.name);
+  return res.json({
+    message: "Welcome " + user.name,
+    user: user.toObject({ getters: true }),
+  });
 };
 
 module.exports = {

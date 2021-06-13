@@ -12,7 +12,7 @@ import {
 import { AuthContext } from "../../shared/context/auth-context";
 import { UserForm } from "../../shared/hooks/form-hook";
 import "./AuthenticatePage.css";
-import { useHttpClient } from "../../shared/components/http-hook";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 
 export default function AuthenticatePage() {
   const auth = useContext(AuthContext);
@@ -44,21 +44,21 @@ export default function AuthenticatePage() {
             password: formState.inputs.password.value,
           }
         );
-        if (response) auth.login();
+
+        if (response) {
+          auth.setUser(response.data.user);
+          auth.login();
+        }
       } catch (error) {
         console.log("got error");
       }
     } else {
       try {
-        const response = await sendRequest(
-          "http://localhost:5000/api/users/signup",
-          "POST",
-          {
-            email: formState.inputs.email.value,
-            password: formState.inputs.password.value,
-            name: formState.inputs.name.value,
-          }
-        );
+        await sendRequest("http://localhost:5000/api/users/signup", "POST", {
+          email: formState.inputs.email.value,
+          password: formState.inputs.password.value,
+          name: formState.inputs.name.value,
+        });
         auth.login();
       } catch (error) {}
     }

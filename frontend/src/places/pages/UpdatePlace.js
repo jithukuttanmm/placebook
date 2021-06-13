@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router";
 import { useParams } from "react-router";
 import Button from "../../shared/components/FormElements/Button";
 import Input from "../../shared/components/FormElements/Input";
@@ -6,14 +7,17 @@ import {
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE,
 } from "../../shared/components/utils/validators";
-import { DUMMY_PLACES } from "./UserPlaces";
-
-import "./NewPlace.css";
+import LoadingSpinner from "../../shared/components/LoadingSpinner";
+import ErrorModal from "../../shared/components/ErrorModal";
 import { UserForm } from "../../shared/hooks/form-hook";
 import Card from "../../shared/components/UIElements/Card";
+import { useHttpClient } from "../../shared/hooks/http-hook";
+
+import "./NewPlace.css";
 
 export default function UpdatePlace() {
   const placeId = useParams().placeId;
+  const history = useHistory();
   const [formState, inputHandler, setFormData] = UserForm(
     {
       title: {
@@ -27,11 +31,36 @@ export default function UpdatePlace() {
     },
     false
   );
+  const [isLoading, isError, sendRequest, clearError] = useHttpClient();
+  const [identifiedPlace, setIdentifiedPlace] = useState(null);
 
-  const identifiedPlace = DUMMY_PLACES.find((p) => p.id === placeId);
-  function handleUpdateSubmit(event) {
+  useEffect(() => {
+    async function getPlace() {
+      try {
+        const result = await sendRequest(
+          `http://localhost:5000/api/places/${placeId}`,
+          "GET"
+        );
+        result && setIdentifiedPlace(result.data);
+      } catch (error) {}
+    }
+    getPlace();
+  }, [placeId, sendRequest]);
+
+  async function handleUpdateSubmit(event) {
     event.preventDefault();
-    console.log(formState);
+
+    try {
+      await sendRequest(
+        `http://localhost:5000/api/places/${placeId}`,
+        "PATCH",
+        {
+          title: formState.inputs.title.value,
+          description: formState.inputs.description.value,
+        }
+      );
+      history.goBack();
+    } catch (err) {}
   }
 
   useEffect(() => {
@@ -50,7 +79,7 @@ export default function UpdatePlace() {
         true
       );
   }, [identifiedPlace, setFormData]);
-
+  console.log(identifiedPlace);
   if (!identifiedPlace)
     return (
       <div className="center">
@@ -59,6 +88,13 @@ export default function UpdatePlace() {
         </Card>
       </div>
     );
+  if (isLoading)
+    return (
+      <div className="center">
+        <LoadingSpinner />
+      </div>
+    );
+  if (isError) return <ErrorModal onClear={clearError} error={isError} />;
   if (formState.inputs.title.value)
     return (
       <form className="place-form" onSubmit={handleUpdateSubmit}>

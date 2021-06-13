@@ -38,8 +38,7 @@ const getUserPlacesById = async (req, res, next) => {
     console.log(error);
     return next(new HttpError("Something went wrong !", 500));
   }
-  if (!places || places.length === 0)
-    return next(new HttpError("No places found for user", 404));
+  if (!places || places.length === 0) return res.json({ places: [] });
 
   return res.json({
     places: places.map((place) => place.toObject({ getters: true })),

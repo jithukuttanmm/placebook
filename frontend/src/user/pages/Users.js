@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ErrorModal from "../../shared/components/ErrorModal";
 import LoadingSpinner from "../../shared/components/LoadingSpinner";
 import UsersList from "../components/UsersList";
-import { useHttpClient } from "../../shared/components/http-hook";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 
 const Users = () => {
   const [loadedUSers, setLoadedUSers] = useState([]);
@@ -17,7 +17,7 @@ const Users = () => {
       response && setLoadedUSers(response.data.users);
     }
     fetchUsers();
-  }, []);
+  }, [sendRequest]);
 
   return (
     <>
