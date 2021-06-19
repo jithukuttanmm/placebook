@@ -4,6 +4,7 @@ import Button from "../../shared/components/FormElements/Button";
 import Input from "../../shared/components/FormElements/Input";
 import LoadingSpinner from "../../shared/components/LoadingSpinner";
 import Card from "../../shared/components/UIElements/Card";
+import ImageUpload from "../../shared/components/FormElements/ImageUpload";
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
@@ -54,11 +55,25 @@ export default function AuthenticatePage() {
       }
     } else {
       try {
-        await sendRequest("http://localhost:5000/api/users/signup", "POST", {
-          email: formState.inputs.email.value,
-          password: formState.inputs.password.value,
-          name: formState.inputs.name.value,
-        });
+        const formData = new FormData();
+        formData.append("email", formState.inputs.email.value);
+        formData.append("password", formState.inputs.password.value);
+        formData.append("name", formState.inputs.name.value);
+        formData.append("image", formState.inputs.image.value);
+
+        const config = {
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        };
+
+        const response = await sendRequest(
+          "http://localhost:5000/api/users/signup",
+          "POST",
+          formData,
+          config
+        );
+        auth.setUser(response.data.user);
         auth.login();
       } catch (error) {}
     }
@@ -69,6 +84,7 @@ export default function AuthenticatePage() {
         {
           ...formState.inputs,
           name: undefined,
+          image: undefined,
         },
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -77,6 +93,10 @@ export default function AuthenticatePage() {
         {
           ...formState.inputs,
           name: {
+            value: "",
+            isValid: false,
+          },
+          image: {
             value: "",
             isValid: false,
           },
@@ -103,6 +123,13 @@ export default function AuthenticatePage() {
               validators={[VALIDATOR_REQUIRE()]}
               errorText="Please enter your name."
               onInput={inputHandler}
+            />
+          )}
+          {!isLoginMode && (
+            <ImageUpload
+              id="image"
+              onInput={inputHandler}
+              errorText="Please provide an image!"
             />
           )}
           <Input

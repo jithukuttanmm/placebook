@@ -16,6 +16,7 @@ export const useHttpClient = () => {
           method,
           url,
           data: body,
+          headers,
         });
 
         return response;

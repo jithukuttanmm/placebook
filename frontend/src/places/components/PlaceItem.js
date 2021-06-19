@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-
 import Card from "../../shared/components/UIElements/Card";
 import Button from "../../shared/components/FormElements/Button";
 import Modal from "../../shared/components/UIElements/Modal";
@@ -28,6 +27,7 @@ const PlaceItem = (props) => {
         `http://localhost:5000/api/places/${props.id}`,
         "DELETE"
       );
+      await props.reFetchPlaces();
     } catch (error) {}
   };
   return (
@@ -66,15 +66,18 @@ const PlaceItem = (props) => {
         }
       >
         <div className="place-item__info">
-          <p>
-            <h2>It can not be undone !</h2>
-          </p>
+          <h2>
+            <p>It can not be undone !</p>
+          </h2>
         </div>
       </Modal>
       <li className="place-item">
         <Card className="place-item__content">
           <div className="place-item__image">
-            <img src={props.image} alt={props.title} />
+            <img
+              src={"http://localhost:5000/" + props.image}
+              alt={props.title}
+            />
           </div>
           <div className="place-item__info">
             <h2>{props.title}</h2>

@@ -7,12 +7,12 @@ import {
 } from "../../shared/components/utils/validators";
 import ErrorModal from "../../shared/components/ErrorModal";
 import LoadingSpinner from "../../shared/components/LoadingSpinner";
+import ImageUpload from "../../shared/components/FormElements/ImageUpload";
 import { UserForm } from "../../shared/hooks/form-hook";
 import { useHttpClient } from "../../shared/hooks/http-hook";
 import { AuthContext } from "../../shared/context/auth-context";
-
-import "./NewPlace.css";
 import { useHistory } from "react-router-dom";
+import "./NewPlace.css";
 
 const newPlace = {
   title: { value: "", isValid: false },
@@ -28,15 +28,29 @@ const NewPlace = () => {
   async function placeSubmitHandler(event) {
     event.preventDefault();
     try {
-      await sendRequest("http://localhost:5000/api/places/create", "POST", {
-        title: formState.inputs.title.value,
-        description: formState.inputs.description.value,
-        address: formState.inputs.address.value,
-        creator: auth.user.id,
-      });
+      const formData = new FormData();
+      formData.append("title", formState.inputs.title.value);
+      formData.append("description", formState.inputs.description.value);
+      formData.append("address", formState.inputs.address.value);
+      formData.append("creator", auth.user.id);
+      formData.append("image", formState.inputs.image.value);
+
+      const config = {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      };
+      await sendRequest(
+        "http://localhost:5000/api/places/create",
+        "POST",
+        formData,
+        config
+      );
 
       history.goBack();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }
   return (
     <>
@@ -66,6 +80,11 @@ const NewPlace = () => {
           validators={[VALIDATOR_REQUIRE(), VALIDATOR_MINLENGTH(5)]}
           errorText={"Enter an address of min length 5"}
           onInput={inputHandler}
+        />
+        <ImageUpload
+          id="image"
+          onInput={inputHandler}
+          errorText="Please provide an image!"
         />
         <Button type="submit" disabled={!formState.isValid}>
           Add Place

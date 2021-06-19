@@ -30,7 +30,7 @@ const signup = async (req, res, next) => {
       name,
       email,
       password,
-      image: "http://placekitten.com/g/200/300",
+      image: req.file.path,
       places: [],
     });
     await user.save();

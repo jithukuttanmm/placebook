@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useHttpClient } from "../../shared/hooks/http-hook";
 import PlaceList from "../components/PlaceList";
@@ -9,21 +9,21 @@ const UserPlaces = () => {
   const [loadedUserPlaces, setLoadedUserPlaces] = useState([]);
   const [isLoading, isError, sendRequest, clearError] = useHttpClient();
   const userId = useParams().userId;
+  const fetchPlaces = useCallback(async () => {
+    try {
+      const response = await sendRequest(
+        `http://localhost:5000/api/places/user/${userId}`,
+        "GET"
+      );
+      setLoadedUserPlaces(response.data.places);
+    } catch (error) {
+      setLoadedUserPlaces([]);
+    }
+  }, [sendRequest, userId]);
 
   useEffect(() => {
-    async function fetchPlaces() {
-      try {
-        const response = await sendRequest(
-          `http://localhost:5000/api/places/user/${userId}`,
-          "GET"
-        );
-        setLoadedUserPlaces(response.data.places);
-      } catch (error) {
-        setLoadedUserPlaces([]);
-      }
-    }
     fetchPlaces();
-  }, [sendRequest, userId]);
+  }, [sendRequest, userId, fetchPlaces]);
 
   return (
     <>
@@ -33,7 +33,11 @@ const UserPlaces = () => {
         </div>
       )}
       <ErrorModal onClear={clearError} error={isError} />
-      <PlaceList items={loadedUserPlaces} userId={userId} />
+      <PlaceList
+        items={loadedUserPlaces}
+        userId={userId}
+        reFetchPlaces={fetchPlaces}
+      />
     </>
   );
 };

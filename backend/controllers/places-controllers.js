@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
 const { v4: uuid } = require("uuid");
 const { getCooridinatesForAddress } = require("../utils/location");
+const fs = require("fs");
 const Place = require("../models/places");
 const User = require("../models/user");
 
@@ -58,8 +59,7 @@ const createPlace = async (req, res, next) => {
       address,
       creator,
       location: coordinates,
-      imageUrl:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/NYC_Empire_State_Building.jpg/640px-NYC_Empire_State_Building.jpg",
+      imageUrl: req.file.path,
     });
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -108,7 +108,7 @@ const deletePlaceById = async (req, res, next) => {
   if (placeId) {
     try {
       place = await Place.findById(placeId).populate("creator");
-
+      const imagePath = place.imageUrl;
       const sess = await mongoose.startSession();
       await sess.startTransaction();
 
@@ -117,6 +117,9 @@ const deletePlaceById = async (req, res, next) => {
       await place.creator.save({ session: sess });
 
       await sess.commitTransaction();
+      fs.unlink(imagePath, (err) => {
+        console.log(err);
+      });
     } catch (error) {
       return next(new HttpError("Something went wrong !", 500));
     }
