@@ -1,4 +1,6 @@
 const { v4: uuid } = require("uuid");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
@@ -7,16 +9,21 @@ const getUsers = async (req, res, next) => {
   let users;
   try {
     users = await User.find({}, "-password");
+    if (!users)
+      return next(new HttpError("fetching users failed, try again !", 500));
+    let allUsers = [];
+    users.forEach(async (user, index) => {
+      const parsedUser = await user.toJSON();
+      allUsers.push(parsedUser);
+      if (index === users.length - 1) {
+        return res.json({
+          users: allUsers,
+        });
+      }
+    });
   } catch (error) {
     return next(new HttpError("fetching users failed, try again !", 500));
   }
-
-  if (!users)
-    return next(new HttpError("fetching users failed, try again !", 500));
-
-  return res.json({
-    users: users.map((user) => user.toObject({ getters: true })),
-  });
 };
 const signup = async (req, res, next) => {
   const error = validationResult(req);
@@ -26,15 +33,17 @@ const signup = async (req, res, next) => {
   try {
     const exists = await User.findOne({ email });
     if (exists) return next(new HttpError("User already exists !", 500));
+
+    const encodedPassword = await bcrypt.hash(password, 10);
     const user = new User({
       name,
       email,
-      password,
+      password: encodedPassword,
       image: req.file.path,
       places: [],
     });
     await user.save();
-    return res.status(201).json({ user: user.toObject({ getters: true }) });
+    return res.status(201).json({ user: user.toJSON() });
   } catch (error) {
     console.log(error);
     return next(new HttpError("Something went wrong, try again !", 500));
@@ -48,13 +57,21 @@ const login = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError("Login failed, try again !", 500));
   }
-
-  if (!user || user.password !== password)
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!user || !isValidPassword)
     return next(new HttpError("Email or password wrong.", 401));
 
+  const token = jwt.sign(
+    { userId: user._id.toString() },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
   return res.json({
     message: "Welcome " + user.name,
-    user: user.toObject({ getters: true }),
+    user: await user.toJSON(),
+    token,
   });
 };
 

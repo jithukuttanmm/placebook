@@ -57,7 +57,7 @@ const createPlace = async (req, res, next) => {
       title,
       description,
       address,
-      creator,
+      creator: req.user._id,
       location: coordinates,
       imageUrl: req.file.path,
     });
@@ -65,7 +65,7 @@ const createPlace = async (req, res, next) => {
     sess.startTransaction();
     const result = await place.save({ session: sess });
 
-    user = await User.findById(creator);
+    user = await User.findById(req.user._id);
     if (!user) return next(new HttpError("Could not find the user !", 404));
 
     user.places.push(place);
@@ -88,6 +88,14 @@ const updatePlaceById = async (req, res, next) => {
   if (placeId) {
     try {
       place = await Place.findById(placeId);
+      if (place.creator.toString() !== req.user._id.toString())
+        return next(
+          new HttpError(
+            "You do not have the permission to edit this place!",
+            401
+          )
+        );
+
       place.title = title;
       place.description = description;
       await place.save();
@@ -108,6 +116,15 @@ const deletePlaceById = async (req, res, next) => {
   if (placeId) {
     try {
       place = await Place.findById(placeId).populate("creator");
+
+      if (place.creator._id.toString() !== req.user._id.toString())
+        return next(
+          new HttpError(
+            "You do not have the permission to delete this place!",
+            401
+          )
+        );
+
       const imagePath = place.imageUrl;
       const sess = await mongoose.startSession();
       await sess.startTransaction();
@@ -121,6 +138,7 @@ const deletePlaceById = async (req, res, next) => {
         console.log(err);
       });
     } catch (error) {
+      console.log(error);
       return next(new HttpError("Something went wrong !", 500));
     }
     if (!place)

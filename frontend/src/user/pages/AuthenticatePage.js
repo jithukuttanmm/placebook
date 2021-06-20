@@ -48,6 +48,7 @@ export default function AuthenticatePage() {
 
         if (response) {
           auth.setUser(response.data.user);
+          auth.setToken(response.data.token);
           auth.login();
         }
       } catch (error) {

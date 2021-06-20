@@ -17,6 +17,7 @@ import { AuthContext } from "./shared/context/auth-context";
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState();
   function login() {
     setIsLoggedIn(true);
   }
@@ -61,7 +62,9 @@ const App = () => {
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setUser, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, setUser, user, login, logout, token, setToken }}
+    >
       <Router>
         <MainNavigation />
         <main>{routes}</main>

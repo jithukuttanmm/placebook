@@ -32,22 +32,21 @@ const NewPlace = () => {
       formData.append("title", formState.inputs.title.value);
       formData.append("description", formState.inputs.description.value);
       formData.append("address", formState.inputs.address.value);
-      formData.append("creator", auth.user.id);
       formData.append("image", formState.inputs.image.value);
 
       const config = {
         headers: {
           "content-type": "multipart/form-data",
         },
+        Authorization: `Bearer ${auth.token}`,
       };
-      await sendRequest(
+      const response = await sendRequest(
         "http://localhost:5000/api/places/create",
         "POST",
         formData,
         config
       );
-
-      history.goBack();
+      if (response) history.goBack();
     } catch (error) {
       console.log(error);
     }

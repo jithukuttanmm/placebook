@@ -12,5 +12,12 @@ const userSchema = new Schema({
 
 userSchema.plugin(uniqueValidator);
 
+userSchema.methods.toJSON = async function () {
+  const user = this;
+  const userObject = user.toObject({ getters: true });
+  delete userObject.password;
+  return userObject;
+};
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;

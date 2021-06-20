@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { useParams } from "react-router";
 import Button from "../../shared/components/FormElements/Button";
@@ -12,10 +12,11 @@ import ErrorModal from "../../shared/components/ErrorModal";
 import { UserForm } from "../../shared/hooks/form-hook";
 import Card from "../../shared/components/UIElements/Card";
 import { useHttpClient } from "../../shared/hooks/http-hook";
-
+import { AuthContext } from "../../shared/context/auth-context";
 import "./NewPlace.css";
 
 export default function UpdatePlace() {
+  const auth = useContext(AuthContext);
   const placeId = useParams().placeId;
   const history = useHistory();
   const [formState, inputHandler, setFormData] = UserForm(
@@ -51,15 +52,16 @@ export default function UpdatePlace() {
     event.preventDefault();
 
     try {
-      await sendRequest(
+      const result = await sendRequest(
         `http://localhost:5000/api/places/${placeId}`,
         "PATCH",
         {
           title: formState.inputs.title.value,
           description: formState.inputs.description.value,
-        }
+        },
+        { Authorization: `Bearer ${auth.token}` }
       );
-      history.goBack();
+      if (result) history.goBack();
     } catch (err) {}
   }
 
@@ -79,7 +81,6 @@ export default function UpdatePlace() {
         true
       );
   }, [identifiedPlace, setFormData]);
-  console.log(identifiedPlace);
   if (!identifiedPlace)
     return (
       <div className="center">
