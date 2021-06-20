@@ -41,7 +41,7 @@ const NewPlace = () => {
         Authorization: `Bearer ${auth.token}`,
       };
       const response = await sendRequest(
-        "http://localhost:5000/api/places/create",
+        process.env.REACT_APP_API_URL + "/places/create",
         "POST",
         formData,
         config

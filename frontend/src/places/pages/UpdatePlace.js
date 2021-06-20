@@ -39,7 +39,7 @@ export default function UpdatePlace() {
     async function getPlace() {
       try {
         const result = await sendRequest(
-          `http://localhost:5000/api/places/${placeId}`,
+          `${process.env.REACT_APP_API_URL}/places/${placeId}`,
           "GET"
         );
         result && setIdentifiedPlace(result.data);
@@ -53,7 +53,7 @@ export default function UpdatePlace() {
 
     try {
       const result = await sendRequest(
-        `http://localhost:5000/api/places/${placeId}`,
+        `${process.env.REACT_APP_API_URL}/places/${placeId}`,
         "PATCH",
         {
           title: formState.inputs.title.value,

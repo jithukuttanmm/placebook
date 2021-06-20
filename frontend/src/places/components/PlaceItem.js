@@ -24,7 +24,7 @@ const PlaceItem = (props) => {
     closeDeleteHandler();
     try {
       await sendRequest(
-        `http://localhost:5000/api/places/${props.id}`,
+        `${process.env.REACT_APP_API_URL}/places/${props.id}`,
         "DELETE",
         null,
         { Authorization: `Bearer ${auth.token}` }

@@ -1,29 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Route,
   Redirect,
   Switch,
 } from "react-router-dom";
-
-import Users from "./user/pages/Users";
-import NewPlace from "./places/pages/NewPlace";
-import UserPlaces from "./places/pages/UserPlaces";
+import jwt_decode from "jwt-decode";
 import MainNavigation from "./shared/components/Navigation/MainNavigation";
-import UpdatePlace from "./places/pages/UpdatePlace";
-import AuthenticatePage from "./user/pages/AuthenticatePage";
+
+import LoadingSpinner from "./shared/components/LoadingSpinner";
 import { AuthContext } from "./shared/context/auth-context";
+import useAuth from "./shared/hooks/auth-hook";
+
+const Users = React.lazy(() => import("./user/pages/Users"));
+const NewPlace = React.lazy(() => import("./places/pages/NewPlace"));
+const UserPlaces = React.lazy(() => import("./places/pages/UserPlaces"));
+const UpdatePlace = React.lazy(() => import("./places/pages/UpdatePlace"));
+const AuthenticatePage = React.lazy(() =>
+  import("./user/pages/AuthenticatePage")
+);
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState();
-  function login() {
-    setIsLoggedIn(true);
-  }
-  function logout() {
-    setIsLoggedIn(false);
-  }
+  const [isLoggedIn, user, setUser, token, setToken, login, logout] = useAuth();
+  const [splashScreen, setSplashScreen] = useState(true);
+  console.log(process.env.REACT_APP_API_URL);
+  useEffect(() => {
+    const oldToken = localStorage.getItem("userToken");
+    if (!oldToken) {
+      setSplashScreen(false);
+      return;
+    }
+    try {
+      let decoded = jwt_decode(oldToken);
+      if (decoded.exp > Math.floor(Date.now() / 1000)) {
+        setUser({ id: decoded.userId });
+        setToken(oldToken);
+        login(oldToken);
+      }
+    } catch (error) {}
+
+    setSplashScreen(false);
+  }, [login, setToken, setUser]);
 
   let routes = null;
   if (isLoggedIn) {
@@ -60,14 +77,29 @@ const App = () => {
       </Switch>
     );
   }
-
+  if (splashScreen)
+    return (
+      <div className="center">
+        <LoadingSpinner />
+      </div>
+    );
   return (
     <AuthContext.Provider
       value={{ isLoggedIn, setUser, user, login, logout, token, setToken }}
     >
       <Router>
         <MainNavigation />
-        <main>{routes}</main>
+        <main>
+          <Suspense
+            fallback={
+              <div className="center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            {routes}
+          </Suspense>
+        </main>
       </Router>
     </AuthContext.Provider>
   );

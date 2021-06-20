@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
+const { EXPIRY_TOKEN } = require("../utils/constants");
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -43,7 +44,14 @@ const signup = async (req, res, next) => {
       places: [],
     });
     await user.save();
-    return res.status(201).json({ user: user.toJSON() });
+    const token = jwt.sign(
+      { userId: user._id.toString(), EXPIRY_TOKEN },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: EXPIRY_TOKEN,
+      }
+    );
+    return res.status(201).json({ user: user.toJSON(), token });
   } catch (error) {
     console.log(error);
     return next(new HttpError("Something went wrong, try again !", 500));
@@ -62,10 +70,10 @@ const login = async (req, res, next) => {
     return next(new HttpError("Email or password wrong.", 401));
 
   const token = jwt.sign(
-    { userId: user._id.toString() },
+    { userId: user._id.toString(), EXPIRY_TOKEN },
     process.env.SECRET_KEY,
     {
-      expiresIn: "1h",
+      expiresIn: EXPIRY_TOKEN,
     }
   );
   return res.json({

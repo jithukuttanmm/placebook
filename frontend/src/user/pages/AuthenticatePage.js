@@ -38,7 +38,7 @@ export default function AuthenticatePage() {
     if (isLoginMode) {
       try {
         const response = await sendRequest(
-          "http://localhost:5000/api/users/login",
+          process.env.REACT_APP_API_URL + "/users/login",
           "POST",
           {
             email: formState.inputs.email.value,
@@ -49,7 +49,7 @@ export default function AuthenticatePage() {
         if (response) {
           auth.setUser(response.data.user);
           auth.setToken(response.data.token);
-          auth.login();
+          auth.login(response.data.token);
         }
       } catch (error) {
         console.log("got error");
@@ -69,13 +69,14 @@ export default function AuthenticatePage() {
         };
 
         const response = await sendRequest(
-          "http://localhost:5000/api/users/signup",
+          process.env.REACT_APP_API_URL + "/users/signup",
           "POST",
           formData,
           config
         );
         auth.setUser(response.data.user);
-        auth.login();
+        auth.setToken(response.data.token);
+        auth.login(response.data.token);
       } catch (error) {}
     }
   };
