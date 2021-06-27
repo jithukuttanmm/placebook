@@ -57,7 +57,7 @@ const signup = async (req, res, next) => {
         expiresIn: EXPIRY_TOKEN,
       }
     );
-    return res.status(201).json({ user: user.toJSON(), token });
+    return res.status(201).json({ user: await user.toJSON(), token });
   } catch (error) {
     console.log(error);
     return next(new HttpError("Something went wrong, try again !", 500));
