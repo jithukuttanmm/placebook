@@ -1,6 +1,7 @@
 const { v4: uuid } = require("uuid");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
@@ -36,12 +37,19 @@ const signup = async (req, res, next) => {
     if (exists) return next(new HttpError("User already exists !", 500));
 
     const encodedPassword = await bcrypt.hash(password, 10);
+
+    const avatar = {
+      data: fs.readFileSync(req.file.path),
+      contentType: "image/png",
+    };
+
     const user = new User({
       name,
       email,
       password: encodedPassword,
       image: req.file.path,
       places: [],
+      avatar,
     });
     await user.save();
     const token = jwt.sign(
@@ -83,8 +91,23 @@ const login = async (req, res, next) => {
   });
 };
 
+const getAvatar = async (req, res, next) => {
+  let user = null;
+  try {
+    user = await User.findById(req.params.id);
+    if (!(user || user.avatar))
+      return next(new HttpError("User not found !", 404));
+    res.set("Content-Type", "image/png");
+    res.send(user.avatar.data);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Something went wrong, try again !", 500));
+  }
+};
+
 module.exports = {
   getUsers,
   signup,
   login,
+  getAvatar,
 };

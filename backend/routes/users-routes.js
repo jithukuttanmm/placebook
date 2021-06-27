@@ -17,5 +17,6 @@ router.post(
   userControllers.signup
 );
 router.post("/login", userControllers.login);
+router.get("/:id/avatar", userControllers.getAvatar);
 
 module.exports = { usersRouter: router };
