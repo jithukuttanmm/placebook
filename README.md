@@ -1,6 +1,6 @@
 # placebook
 
-*******Deployment not done*******
+Deployed here - http://yourplacebook.herokuapp.com/
 
 Target ---> a facebook like book, but for places only 😉
 
