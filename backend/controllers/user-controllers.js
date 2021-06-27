@@ -23,6 +23,9 @@ const getUsers = async (req, res, next) => {
         });
       }
     });
+    return res.json({
+      users: allUsers,
+    });
   } catch (error) {
     return next(new HttpError("fetching users failed, try again !", 500));
   }
