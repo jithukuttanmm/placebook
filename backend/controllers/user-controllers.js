@@ -1,7 +1,7 @@
 const { v4: uuid } = require("uuid");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const fs = require("fs");
+const sharp = require("sharp");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
@@ -35,9 +35,9 @@ const signup = async (req, res, next) => {
     if (exists) return next(new HttpError("User already exists !", 500));
 
     const encodedPassword = await bcrypt.hash(password, 10);
-
+    const buffer = await sharp(req.file.buffer).png().toBuffer(); // image editing.
     const avatar = {
-      data: fs.readFileSync(req.file.path),
+      data: buffer,
       contentType: "image/png",
     };
 

@@ -1,9 +1,8 @@
 const HttpError = require("../models/http-error");
 const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
-const { v4: uuid } = require("uuid");
+const sharp = require("sharp");
 const { getCooridinatesForAddress } = require("../utils/location");
-const fs = require("fs");
 const Place = require("../models/places");
 const User = require("../models/user");
 const PlaceImage = require("../models/placeImage");
@@ -54,9 +53,9 @@ const createPlace = async (req, res, next) => {
   let user;
   try {
     const coordinates = await getCooridinatesForAddress(address);
-
+    const buffer = await sharp(req.file.buffer).png().toBuffer(); // image editing.
     const placeImage = new PlaceImage({
-      data: fs.readFileSync(req.file.path),
+      data: buffer,
       contentType: "image/png",
     });
     const savedPlace = await placeImage.save();
@@ -124,6 +123,7 @@ const deletePlaceById = async (req, res, next) => {
   if (placeId) {
     try {
       place = await Place.findById(placeId).populate("creator");
+      placeImage = await PlaceImage.findById(place.imageId);
 
       if (place.creator._id.toString() !== req.user._id.toString())
         return next(
@@ -136,15 +136,12 @@ const deletePlaceById = async (req, res, next) => {
       const imagePath = place.imageUrl;
       const sess = await mongoose.startSession();
       await sess.startTransaction();
-
+      await placeImage.remove();
       await place.remove({ session: sess });
       place.creator.places.pull(place);
       await place.creator.save({ session: sess });
 
       await sess.commitTransaction();
-      fs.unlink(imagePath, (err) => {
-        console.log(err);
-      });
     } catch (error) {
       console.log(error);
       return next(new HttpError("Something went wrong !", 500));
@@ -159,7 +156,6 @@ const deletePlaceById = async (req, res, next) => {
 
 const getPlaceImageById = async (req, res, next) => {
   let place = null;
-  console.log(req.params.placeId);
   try {
     place = await PlaceImage.findById(req.params.placeId);
     console.log(place);
