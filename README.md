@@ -21,5 +21,5 @@ then run "npm run dev"
 
 configure as you go, happy coding ! 🥳
 
-Update
+Update -
 _added support to save images to DB - no restrictions on the size as of now !_
