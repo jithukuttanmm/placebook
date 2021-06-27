@@ -10,6 +10,7 @@ const placesSchema = mongoose.Schema({
     lang: { type: Number, required: true },
   },
   creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
+  imageId: { type: mongoose.Types.ObjectId, required: true, ref: "PlaceImage" },
 });
 
 const Place = mongoose.model("Place", placesSchema);

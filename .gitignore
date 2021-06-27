@@ -3,3 +3,4 @@ package-lock*
 .DS_Store
 backend/uploads/images/*
 *.env
+frontend/build
