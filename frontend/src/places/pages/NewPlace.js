@@ -17,6 +17,8 @@ import "./NewPlace.css";
 const newPlace = {
   title: { value: "", isValid: false },
   description: { value: "", isValid: false },
+  address: { value: "", isValid: false },
+  image: { value: "", isValid: false },
 };
 
 const NewPlace = () => {

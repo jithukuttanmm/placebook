@@ -23,7 +23,6 @@ const AuthenticatePage = React.lazy(() =>
 const App = () => {
   const [isLoggedIn, user, setUser, token, setToken, login, logout] = useAuth();
   const [splashScreen, setSplashScreen] = useState(true);
-  console.log(process.env.REACT_APP_API_URL);
   useEffect(() => {
     const oldToken = localStorage.getItem("userToken");
     if (!oldToken) {

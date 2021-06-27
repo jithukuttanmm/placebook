@@ -22,6 +22,7 @@ router.patch(
   placesControllers.updatePlaceById
 );
 router.delete("/:placeId", auth, placesControllers.deletePlaceById);
+router.get("/image/:placeId", placesControllers.getPlaceImageById);
 
 module.exports = {
   placeRouter: router,

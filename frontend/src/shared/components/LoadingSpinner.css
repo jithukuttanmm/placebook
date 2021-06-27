@@ -5,7 +5,7 @@
 }
 
 .lds-dual-ring:after {
-  content: ' ';
+  content: " ";
   display: block;
   width: 46px;
   height: 46px;
@@ -26,6 +26,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.zero-height {
+  height: 1px !important;
 }
 
 @keyframes lds-dual-ring {

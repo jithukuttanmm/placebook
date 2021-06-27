@@ -10,7 +10,7 @@ const { EXPIRY_TOKEN } = require("../utils/constants");
 const getUsers = async (req, res, next) => {
   let users;
   try {
-    users = await User.find({}, "-password");
+    users = await User.find({}, "-password -avatar");
     if (!users)
       return next(new HttpError("fetching users failed, try again !", 500));
     let allUsers = [];
@@ -71,8 +71,9 @@ const login = async (req, res, next) => {
   try {
     user = await User.findOne({ email });
   } catch (error) {
-    return next(new HttpError("Login failed, try again !", 500));
+    return next(new HttpError("User not found, please sign up!", 500));
   }
+  if (!user) return next(new HttpError("User not found, please sign up!", 500));
   const isValidPassword = await bcrypt.compare(password, user.password);
   if (!user || !isValidPassword)
     return next(new HttpError("Email or password wrong.", 401));

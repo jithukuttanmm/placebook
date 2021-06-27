@@ -6,6 +6,7 @@ const { getCooridinatesForAddress } = require("../utils/location");
 const fs = require("fs");
 const Place = require("../models/places");
 const User = require("../models/user");
+const PlaceImage = require("../models/placeImage");
 
 const getPlacesById = async (req, res, next) => {
   const { placeId } = req.params;
@@ -53,6 +54,12 @@ const createPlace = async (req, res, next) => {
   let user;
   try {
     const coordinates = await getCooridinatesForAddress(address);
+
+    const placeImage = new PlaceImage({
+      data: fs.readFileSync(req.file.path),
+      contentType: "image/png",
+    });
+    const savedPlace = await placeImage.save();
     const place = new Place({
       title,
       description,
@@ -60,6 +67,7 @@ const createPlace = async (req, res, next) => {
       creator: req.user._id,
       location: coordinates,
       imageUrl: req.file.path,
+      imageId: savedPlace._id,
     });
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -149,10 +157,27 @@ const deletePlaceById = async (req, res, next) => {
   return next(new HttpError("Delete failed - place not found!", 404));
 };
 
+const getPlaceImageById = async (req, res, next) => {
+  let place = null;
+  console.log(req.params.placeId);
+  try {
+    place = await PlaceImage.findById(req.params.placeId);
+    console.log(place);
+    if (!(place || place.data))
+      return next(new HttpError("Place not found !", 404));
+    res.set("Content-Type", "image/png");
+    res.send(place.data);
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Something went wrong, try again !", 500));
+  }
+};
+
 module.exports = {
   getPlacesById,
   getUserPlacesById,
   createPlace,
   updatePlaceById,
   deletePlaceById,
+  getPlaceImageById,
 };

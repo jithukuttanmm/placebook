@@ -8,6 +8,7 @@ import { AuthContext } from "../../shared/context/auth-context";
 import { useHttpClient } from "../../shared/hooks/http-hook";
 import LoadingSpinner from "../../shared/components/LoadingSpinner";
 import ErrorModal from "../../shared/components/ErrorModal";
+import LoadImage from "../../shared/components/LoadImage";
 
 const PlaceItem = (props) => {
   const auth = useContext(AuthContext);
@@ -76,8 +77,8 @@ const PlaceItem = (props) => {
       <li className="place-item">
         <Card className="place-item__content">
           <div className="place-item__image">
-            <img
-              src={"http://localhost:5000/" + props.image}
+            <LoadImage
+              src={`${process.env.REACT_APP_API_URL}/places/image/${props.image}`}
               alt={props.title}
             />
           </div>
