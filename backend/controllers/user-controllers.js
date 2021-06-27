@@ -14,14 +14,9 @@ const getUsers = async (req, res, next) => {
     if (!users)
       return next(new HttpError("fetching users failed, try again !", 500));
     let allUsers = [];
-    users.forEach(async (user, index) => {
+    await users.forEach(async (user, index) => {
       const parsedUser = await user.toJSON();
       allUsers.push(parsedUser);
-      if (index === users.length - 1) {
-        return res.json({
-          users: allUsers,
-        });
-      }
     });
     return res.json({
       users: allUsers,
