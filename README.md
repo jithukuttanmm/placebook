@@ -1,6 +1,6 @@
 # placebook
 
-*******Deployment not done*******
+Deployed here - http://yourplacebook.herokuapp.com/
 
 Target ---> a facebook like book, but for places only 😉
 
@@ -20,3 +20,6 @@ then run "npm start"
 then run "npm run dev"
 
 configure as you go, happy coding ! 🥳
+
+Update -
+_added support to save images to DB - no restrictions on the size as of now !_
